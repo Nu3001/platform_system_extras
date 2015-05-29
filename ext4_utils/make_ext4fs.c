@@ -301,6 +301,14 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 
 static u32 compute_block_size()
 {
+	/* On smaller filesytems 4096 is a terrible default.
+	   For example on a 4MB filesystem you receive this error 'error: do_inode_allocate_extents: Failed to allocate 1025 blocks
+	   On a 4MB filesystem there isn't even enough space to store the journal with 4096 byte blocks.
+	   So lets make any filesystem smaller than 32MB use 1024 byte blocks
+	*/
+	if (info.len < 32 * 1048576)
+		return 1024;
+
 	return 4096;
 }
 
